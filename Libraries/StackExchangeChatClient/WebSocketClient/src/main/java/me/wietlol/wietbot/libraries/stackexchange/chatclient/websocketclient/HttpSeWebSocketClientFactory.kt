@@ -6,11 +6,9 @@ import me.wietlol.loggo.common.ScopedSourceLogger
 import me.wietlol.loggo.common.logInformation
 import me.wietlol.utils.json.SimpleJsonSerializer
 import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.HttpSeChatClient
+import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.HttpSeClient
+import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.HttpSeClient.Companion.chatSiteUrl
 import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.SeCredentials
-import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.chatSiteUrl
-import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.getAccountFKey
-import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.getMainFKey
-import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.login
 
 class HttpSeWebSocketClientFactory(
 	val listener: WebSocketListener,
@@ -18,7 +16,6 @@ class HttpSeWebSocketClientFactory(
 	val serializer: SimpleJsonSerializer,
 	val initialRoom: Int,
 	val logger: CommonLogger,
-	val reconnectCheckInterval: Long,
 ) : SeWebSocketClientFactory
 {
 	private val loginEventId = EventId(2145437065, "logging-in")
@@ -31,15 +28,10 @@ class HttpSeWebSocketClientFactory(
 			"username" to credentials.emailAddress
 		))
 		
-		val cookieJar = mutableMapOf<String, String>()
+		val seClient = HttpSeClient()
+		val accountFKey = seClient.login(credentials)
 		
-		val mainFKey = getMainFKey(cookieJar)
-		
-		login(mainFKey, credentials.emailAddress, credentials.password, cookieJar)
-		
-		val accountFKey = getAccountFKey(cookieJar)
-		
-		val client = HttpSeChatClient(chatSiteUrl, accountFKey, cookieJar, serializer, logger)
-		return HttpSeWebSocketClient(client, chatSiteUrl, accountFKey, cookieJar, listener, chatEvents, serializer, initialRoom, logger, reconnectCheckInterval)
+		val client = HttpSeChatClient(seClient, chatSiteUrl, accountFKey, serializer, logger)
+		return HttpSeWebSocketClient(seClient, client, chatSiteUrl, accountFKey, listener, chatEvents, serializer, initialRoom, logger)
 	}
 }

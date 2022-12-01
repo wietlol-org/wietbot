@@ -8,8 +8,8 @@ import me.wietlol.loggo.common.logTrace
 import me.wietlol.utils.json.SimpleJsonSerializer
 import me.wietlol.utils.json.deserialize
 import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.SeChatClient
+import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.SeClient
 import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.UnexpectedSituationException
-import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.extractFKey
 import org.java_websocket.client.WebSocketClient
 import java.io.Closeable
 import java.net.URI
@@ -18,16 +18,15 @@ import java.util.*
 import kotlin.collections.HashMap
 
 class HttpSeWebSocketClient(
+	private val client: SeClient,
 	private val chatClient: SeChatClient,
 	private val chatSiteUrl: String,
 	private val accountFKey: String,
-	private val cookieJar: Map<String, String>,
 	private val listener: WebSocketListener,
 	private val chatEvents: SeChatEvents,
 	private val serializer: SimpleJsonSerializer,
 	private val initialRoom: Int,
 	logger: CommonLogger,
-	reconnectCheckInterval: Long,
 ) : SeWebSocketClient, SeChatClient by chatClient, Closeable
 {
 	private val logger = ScopedSourceLogger(logger) { it + "HttpSeWebSocketClient" }
@@ -49,15 +48,8 @@ class HttpSeWebSocketClient(
 		get() = isClosingMap[this] ?: false
 		set(value) = isClosingMap.set(this, value)
 	
-	private var client: WebSocketClient = connect(initialRoom)
+	private var webSocketClient: WebSocketClient = connect(initialRoom)
 
-//	private var hasUnexpectedlyClosed = false
-//	private val timer = Timer("reconnection-timer", false)
-//		.schedule(reconnectCheckInterval, reconnectCheckInterval) {
-//			if (hasUnexpectedlyClosed)
-//				reconnect(initialRoom)
-//		}
-	
 	override fun reconnect(roomId: Int)
 	{
 		logger.logTrace(reconnectEventId, mapOf(
@@ -71,11 +63,10 @@ class HttpSeWebSocketClient(
 		
 		try
 		{
-			client = connect(roomId)
+			webSocketClient = connect(roomId)
 		}
 		catch (ex: Throwable)
 		{
-//			hasUnexpectedlyClosed = false
 			throw ex
 		}
 	}
@@ -83,18 +74,11 @@ class HttpSeWebSocketClient(
 	private fun reconnectIfNotClosing()
 	{
 		logger.logTrace(closeEventId, mapOf(
-			"isClosing" to client.isClosingFlag,
+			"isClosing" to webSocketClient.isClosingFlag,
 		))
 		
-		if (client.isClosingFlag)
-		{
-//			timer.cancel()
-		}
-		else
-		{
-//			hasUnexpectedlyClosed = true
+		if (webSocketClient.isClosingFlag.not())
 			reconnect(initialRoom)
-		}
 	}
 	
 	override fun joinRoom(roomId: Int): Room
@@ -102,14 +86,15 @@ class HttpSeWebSocketClient(
 		logger.logTrace(joinRoomEventId, mapOf(
 			"roomId" to roomId
 		))
-		return khttp.get("$chatSiteUrl/rooms/$roomId")
-			.apply {
-				if (statusCode == 404)
-					throw RoomNotFoundException("Room $roomId does not exist.")
-			}
-			.apply { text.extractFKey() }
-			.run { getRoom(roomId) }
-			.also { reconnect(it.roomId) }
+		
+		val response = client.get("$chatSiteUrl/rooms/$roomId")
+		
+		if (response.statusCode() == 404)
+			throw RoomNotFoundException("Room $roomId does not exist.")
+		
+		val room = getRoom(roomId)
+		reconnect(room.roomId)
+		return room
 	}
 	
 	override fun getRoom(roomId: Int): Room =
@@ -120,40 +105,37 @@ class HttpSeWebSocketClient(
 		logger.logTrace(leaveRoomEventId, mapOf(
 			"roomId" to roomId
 		))
-		khttp.post(
-			"$chatSiteUrl/chats/leave/$roomId",
-			data = mapOf(
-				"quiet" to "true",
-				"fkey" to accountFKey
-			),
-			cookies = cookieJar
-		)
-			.apply {
-				if (statusCode == 404)
-					throw RoomNotFoundException("Room $roomId does not exist.")
-			}
-			.also { reconnect(initialRoom) }
+		
+		val response = client.post("$chatSiteUrl/chats/leave/$roomId", listOf(
+			"quiet" to "true",
+			"fkey" to accountFKey
+		))
+		
+		if (response.statusCode() == 404)
+			throw RoomNotFoundException("Room $roomId does not exist.")
+		
+		reconnect(initialRoom)
 	}
 	
 	override fun leaveAllRooms()
 	{
 		logger.logTrace(leaveAllRoomsEventId, emptyMap<Any, Any>())
-		khttp.post(
-			"$chatSiteUrl/chats/leave/all",
-			data = mapOf(
-				"quiet" to "true",
-				"fkey" to accountFKey
-			),
-			cookies = cookieJar
-		)
+		
+		client.post("$chatSiteUrl/chats/leave/all", listOf(
+			"quiet" to "true",
+			"fkey" to accountFKey
+		))
 	}
 	
 	override fun close()
 	{
+		while (!webSocketClient.isOpen)
+			Thread.sleep(500)
+		
 		logger.logTrace(closeInvokedEventId, emptyMap<Any, Any>())
 		
-		client.isClosingFlag = true
-		client.close()
+		webSocketClient.isClosingFlag = true
+		webSocketClient.close()
 	}
 	
 	private data class WsAuthResponse(val url: String)
@@ -167,31 +149,22 @@ class HttpSeWebSocketClient(
 		
 		try
 		{
-			val wssResponse: WsAuthResponse = khttp.post(
-				"$chatSiteUrl/ws-auth",
-				cookies = cookieJar,
-				data = mapOf(
-					"roomId" to roomId.toString(),
-					"fkey" to accountFKey
-				),
-				headers = mapOf(
-					"Origin" to chatSiteUrl,
-					"Referer" to "$chatSiteUrl/rooms/$roomId",
-					"Content-Type" to "application/x-www-form-urlencoded"
-				)
-			)
-				.also {
-					if (it.statusCode == 404)
-						throw UnexpectedSituationException("ws-auth not found")
-				}
-				.let { serializer.deserialize(it.text) }
+			val response = client.post("$chatSiteUrl/ws-auth", listOf(
+				"roomId" to roomId.toString(),
+				"fkey" to accountFKey,
+			), mapOf(
+				"Origin" to chatSiteUrl,
+				"Referer" to "$chatSiteUrl/rooms/$roomId",
+			))
 			
-			val chatSiteUrl = "https://chat.stackoverflow.com"
+			if (response.statusCode() == 404)
+				throw UnexpectedSituationException("ws-auth not found")
+			
+			val wssResponse: WsAuthResponse = serializer.deserialize(response.body())
+			
 			val webSocketUrl = "${wssResponse.url}?l=${Instant.now().toEpochMilli()}"
 			
-			val listener = listener.let {
-				ReconnectingWebSocketListener(it) { reconnectIfNotClosing() }
-			}
+			val listener = ReconnectingWebSocketListener(listener) { reconnectIfNotClosing() }
 			
 			return JavaWebSocketClientAdapter(URI(webSocketUrl), mapOf("Origin" to chatSiteUrl), listener, logger)
 				.apply { connect() }

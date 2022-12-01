@@ -5,6 +5,7 @@ import me.wietlol.loggo.common.EventId
 import me.wietlol.loggo.common.ScopedSourceLogger
 import me.wietlol.loggo.common.logInformation
 import me.wietlol.utils.json.SimpleJsonSerializer
+import me.wietlol.wietbot.libraries.stackexchange.chatclient.chatclient.HttpSeClient.Companion.chatSiteUrl
 
 class HttpSeChatClientFactory(
 	val serializer: SimpleJsonSerializer,
@@ -21,14 +22,9 @@ class HttpSeChatClientFactory(
 			"username" to credentials.emailAddress
 		))
 		
-		val cookieJar = mutableMapOf<String, String>()
+		val seClient = HttpSeClient()
+		val accountFKey = seClient.login(credentials)
 		
-		val mainFKey = getMainFKey(cookieJar)
-		
-		login(mainFKey, credentials.emailAddress, credentials.password, cookieJar)
-		
-		val accountFKey = getAccountFKey(cookieJar)
-		
-		return HttpSeChatClient(chatSiteUrl, accountFKey, cookieJar, serializer, logger)
+		return HttpSeChatClient(seClient, chatSiteUrl, accountFKey, serializer, logger)
 	}
 }

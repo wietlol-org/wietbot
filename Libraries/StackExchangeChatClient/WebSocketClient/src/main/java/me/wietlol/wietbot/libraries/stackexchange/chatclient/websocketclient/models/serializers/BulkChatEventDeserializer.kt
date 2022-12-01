@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonParser
 import com.fasterxml.jackson.databind.DeserializationContext
 import com.fasterxml.jackson.databind.JsonNode
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.fasterxml.jackson.databind.PropertyNamingStrategy
+import com.fasterxml.jackson.databind.PropertyNamingStrategies
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer
 import me.wietlol.wietbot.libraries.stackexchange.chatclient.websocketclient.models.BulkChatEvent
 import me.wietlol.wietbot.libraries.stackexchange.chatclient.websocketclient.models.EventType
@@ -30,7 +30,7 @@ class BulkChatEventDeserializer(
 		val oldNaming = objectMapper.propertyNamingStrategy
 		try
 		{
-			objectMapper.propertyNamingStrategy = PropertyNamingStrategy.SNAKE_CASE
+			objectMapper.propertyNamingStrategy = PropertyNamingStrategies.SNAKE_CASE
 			
 			val node: JsonNode = parser.codec.readTree(parser)
 			val events = node
