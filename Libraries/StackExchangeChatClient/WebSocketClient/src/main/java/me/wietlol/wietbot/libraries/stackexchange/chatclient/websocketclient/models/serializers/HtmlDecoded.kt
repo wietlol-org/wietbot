@@ -44,7 +44,7 @@ fun MessageDeleted.htmlDecode(): MessageDeleted =
 fun MessageEdited.htmlDecode(): MessageEdited =
 	MessageEdited(
 		timeStamp,
-		content.htmlDecode(),
+		content,
 		id,
 		userId,
 		userName.htmlDecode(),
@@ -71,7 +71,7 @@ fun MessageMovedOut.htmlDecode(): MessageMovedOut =
 fun MessagePosted.htmlDecode(): MessagePosted =
 	MessagePosted(
 		timeStamp,
-		content.htmlDecode(),
+		content,
 		id,
 		userId,
 		userName.htmlDecode(),
@@ -85,7 +85,7 @@ fun MessagePosted.htmlDecode(): MessagePosted =
 fun MessageStarred.htmlDecode(): MessageStarred =
 	MessageStarred(
 		timeStamp,
-		content.htmlDecode(),
+		content,
 		id,
 		roomId,
 		roomName.htmlDecode(),
@@ -96,7 +96,7 @@ fun MessageStarred.htmlDecode(): MessageStarred =
 fun ReplyPosted.htmlDecode(): ReplyPosted =
 	ReplyPosted(
 		timeStamp,
-		content.htmlDecode(),
+		content,
 		id,
 		userId,
 		targetUserId,
@@ -133,7 +133,7 @@ fun UserLeft.htmlDecode(): UserLeft =
 fun UserMentioned.htmlDecode(): UserMentioned =
 	UserMentioned(
 		timeStamp,
-		content.htmlDecode(),
+		content,
 		id,
 		userId,
 		targetUserId,
@@ -145,5 +145,7 @@ fun UserMentioned.htmlDecode(): UserMentioned =
 		showParent
 	)
 
-private fun String.htmlDecode(): String =
-	Jsoup.parse(this).text()
+private fun String.htmlDecode(): String
+{
+	return Jsoup.parse(this).text()
+}

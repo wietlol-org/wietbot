@@ -5,17 +5,17 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 @JsonIgnoreProperties(ignoreUnknown = true)
 data class UserMentioned(
 	val timeStamp: Long,
-	val content: String,
+	override val content: String,
 	override val id: Int,
-	val userId: Int,
+	override val userId: Int,
 	val targetUserId: Int,
-	val userName: String,
+	override val userName: String,
 	override val roomId: Int,
 	override val roomName: String,
 	val messageId: Int,
 	val parentId: Int?,
 	val showParent: Boolean?
-) : SeChatEvent
+) : MessageEvent
 {
 	override val eventType: EventType
 		get() = EventType.UserMentioned
