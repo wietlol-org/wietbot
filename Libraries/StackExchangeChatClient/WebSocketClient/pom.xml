@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>me.wietlol.wietbot</groupId>
 		<artifactId>libraries-stack-exchange-chat-client</artifactId>
-		<version>1.0.0</version>
+		<version>1.0.0-SNAPSHOT</version>
 	</parent>
 	
 	<artifactId>libraries-stack-exchange-chat-client-websocket-client</artifactId>
