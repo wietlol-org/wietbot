@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>me.wietlol.wietbot</groupId>
+		<artifactId>libraries-stack-exchange-chat-client</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	
+	<artifactId>libraries-stack-exchange-chat-client-chat-client</artifactId>
+	<packaging>jar</packaging>
+	
+	<!-- required for https://github.com/ascclemens/khttp -->
+	<repositories>
+		<repository>
+			<id>jcenter</id>
+			<url>https://jcenter.bintray.com/</url>
+		</repository>
+	</repositories>
+	
+	<dependencies>
+		<!-- specific version selection to override khttp's version -->
+		<dependency>
+			<groupId>org.jetbrains.kotlin</groupId>
+			<artifactId>kotlin-stdlib-jdk8</artifactId>
+			<version>${kotlin.version}</version>
+		</dependency>
+		
+		<!-- serialization -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-kotlin</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		
+		<!-- http requests -->
+		<!-- https://github.com/ascclemens/khttp -->
+		<dependency>
+			<groupId>khttp</groupId>
+			<artifactId>khttp</artifactId>
+			<version>${khttp.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>me.wietlol.utils</groupId>
+			<artifactId>utils-json</artifactId>
+			<version>${utils.version}</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>me.wietlol.konfig</groupId>
+			<artifactId>konfig-api</artifactId>
+			<version>${konfig.version}</version>
+		</dependency>
+		
+		<!--		<dependency>-->
+		<!--			<groupId>me.wietlol.loggo</groupId>-->
+		<!--			<artifactId>loggo-common</artifactId>-->
+		<!--			<version>${loggo.version}</version>-->
+		<!--		</dependency>-->
+	</dependencies>
+</project>

@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project
+	xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	
+	<parent>
+		<groupId>me.wietlol.wietbot</groupId>
+		<artifactId>libraries-stack-exchange-chat-client</artifactId>
+		<version>1.0.0</version>
+	</parent>
+	
+	<artifactId>libraries-stack-exchange-chat-client-websocket-client</artifactId>
+	<packaging>jar</packaging>
+	
+	<dependencies>
+		<dependency>
+			<groupId>me.wietlol.wietbot</groupId>
+			<artifactId>libraries-stack-exchange-chat-client-chat-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		
+		<!-- events -->
+		<dependency>
+			<groupId>me.wietlol.reactor</groupId>
+			<artifactId>reactor-core</artifactId>
+			<version>${reactor.version}</version>
+		</dependency>
+		
+		<!-- so chat connection -->
+		<!-- https://mvnrepository.com/artifact/org.java-websocket/Java-WebSocket -->
+		<dependency>
+			<groupId>org.java-websocket</groupId>
+			<artifactId>Java-WebSocket</artifactId>
+			<version>${websocket.version}</version>
+		</dependency>
+		
+		<!-- html parsing -->
+		<!-- https://mvnrepository.com/artifact/org.jsoup/jsoup -->
+		<dependency>
+			<groupId>org.jsoup</groupId>
+			<artifactId>jsoup</artifactId>
+			<version>${jsoup.version}</version>
+		</dependency>
+	</dependencies>
+</project>
