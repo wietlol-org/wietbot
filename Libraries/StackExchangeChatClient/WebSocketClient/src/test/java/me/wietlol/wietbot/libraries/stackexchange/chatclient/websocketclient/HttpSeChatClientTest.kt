@@ -48,20 +48,30 @@ class HttpSeChatClientTest
 				1,
 				logger
 			)
-			webSocketClientFactory.create(credentials).use { webSocketClient ->
-//				val messageId = webSocketClient.sendMessage(1, "wörk 2")
-//				Thread.sleep(2_000)
-//				webSocketClient.editMessage(messageId, "wörk 3")
-//				Thread.sleep(2_000)
-				
-				webSocketClient.joinRoom(1)
-				Thread.sleep(2_000)
-				webSocketClient.leaveRoom(1)
-				Thread.sleep(2_000)
-				webSocketClient.leaveAllRooms()
-				Thread.sleep(2_000)
-				webSocketClient.reconnect(1)
+			
+			events.onMessagePosted.register {
+				println("${it.userName}: ${it.content}")
 			}
+			
+			val webSocketClient = webSocketClientFactory.create(credentials)
+			webSocketClient.joinRoom(7)
+			webSocketClient.joinRoom(17)
+			webSocketClient.joinRoom(139)
+			
+//			webSocketClientFactory.create(credentials).use { webSocketClient ->
+////				val messageId = webSocketClient.sendMessage(1, "wörk 2")
+////				Thread.sleep(2_000)
+////				webSocketClient.editMessage(messageId, "wörk 3")
+////				Thread.sleep(2_000)
+//
+//				webSocketClient.joinRoom(1)
+//				Thread.sleep(2_000)
+//				webSocketClient.leaveRoom(1)
+//				Thread.sleep(2_000)
+//				webSocketClient.leaveAllRooms()
+//				Thread.sleep(2_000)
+//				webSocketClient.reconnect(1)
+//			}
 
 //			chatClient.sendMessage(1, "You feel an evil presence approaching you.")
 		}

@@ -34,7 +34,7 @@ class JavaWebSocketClientAdapter(
 	private val onErrorEventId = EventId(1432886368, "onError-invoke")
 	private val onMessageEventId = EventId(1314582054, "onMessage-invoke")
 	private val onCloseEventId = EventId(1899387131, "onClose-invoke")
-	private val onMessage2EventId = EventId(1255914631, "onMessage-invoke")
+	private val onRawMessageEventId = EventId(1255914631, "onRawMessage-invoke")
 	private val onWebsocketHandshakeReceivedAsServerEventId = EventId(1782058773, "onWebsocketHandshakeReceivedAsServer-invoke")
 	private val onWebsocketHandshakeReceivedAsClientEventId = EventId(1659378048, "onWebsocketHandshakeReceivedAsClient-invoke")
 	private val onWebsocketHandshakeSentAsClientEventId = EventId(1318810130, "onWebsocketHandshakeSentAsClient-invoke")
@@ -80,7 +80,7 @@ class JavaWebSocketClientAdapter(
 	
 	override fun onMessage(bytes: ByteBuffer?)
 	{
-		logger.logInformation(onMessage2EventId, mapOf<Any, Any>())
+		logger.logInformation(onRawMessageEventId, mapOf<Any, Any>())
 		super.onMessage(bytes)
 	}
 	
