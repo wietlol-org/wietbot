@@ -1,0 +1,144 @@
+
+@Module("WietbotDataMessages")
+@Owner("Wietbot")
+@Version("1.0")
+
+@Root("../../../../../../../")
+@ApiRoot("java")
+@ImplRoot("java")
+
+@RootPackage("me.wietlol.wietbot.data.messages.models")
+@BuilderPackage(".builders")
+@ModelPackage(".models")
+@SerializerPackage(".serializers")
+
+;
+
+blueprint MessageEventList {
+	property(1) messageId: String
+	property(2) events: List<ChatEvent>
+}
+
+contract ChatEvent {
+	value id: String
+	value timeStamp: Long
+	value messageId: String
+	value user: ChatUser
+	value source: MessageSource
+	value platform: Platform
+}
+
+contract MessageEvent : ChatEvent {
+	value content: Content
+}
+
+blueprint MessagePostedEvent : MessageEvent {
+	property(1) id: String
+	property(2) timeStamp: Long
+
+	property(3) messageId: String
+	property(4) content: Content
+
+	property(5) user: ChatUser
+	property(6) source: MessageSource
+	property(7) platform: Platform
+}
+
+blueprint MessageEditedEvent : MessageEvent {
+	property(1) id: String
+	property(2) timeStamp: Long
+
+	property(3) messageId: String
+	property(4) content: Content
+
+	property(5) user: ChatUser
+	property(6) source: MessageSource
+	property(7) platform: Platform
+}
+
+blueprint MessageDeletedEvent : ChatEvent {
+	property(1) id: String
+	property(2) timeStamp: Long
+
+	property(3) messageId: String
+
+	property(4) user: ChatUser
+	property(5) source: MessageSource
+	property(6) platform: Platform
+}
+
+blueprint ChatUser {
+	property(1) localId: String
+	property(2) localName: String
+	property(3) platform: Platform
+	property(4) internalId: Long
+	property(5) stackOverflowId: String?
+	property(6) stackOverflowName: String?
+	property(7) discordId: String?
+	property(8) discordName: String?
+	property(9) wietbotWebsiteId: String?
+	property(10) wietbotWebsiteName: String?
+}
+
+blueprint MessageSource {
+	property(1) id: String
+	property(2) name: String
+	property(3) platform: Platform
+}
+
+blueprint Content {
+	property(1) part: ContentPart
+}
+
+contract ContentPart {
+}
+
+blueprint MultiPart : ContentPart {
+	property(1) parts: List<ContentPart>
+}
+
+blueprint TextPart : ContentPart {
+	property(1) text: String
+}
+
+blueprint MonospacedPart : ContentPart {
+	property(1) text: String
+}
+
+blueprint InlineMonospacedPart : ContentPart {
+	property(1) text: String
+}
+
+blueprint UrlPart : ContentPart {
+	property(1) href: String
+	property(2) text: ContentPart
+	property(3) title: ContentPart?
+}
+
+blueprint QuotePart : ContentPart {
+	property(1) inner: ContentPart
+}
+
+blueprint BoldPart : ContentPart {
+	property(1) inner: ContentPart
+}
+
+blueprint ItalicPart : ContentPart {
+	property(1) inner: ContentPart
+}
+
+blueprint StrikeoutPart : ContentPart {
+	property(1) inner: ContentPart
+}
+
+blueprint TagPart : ContentPart {
+	property(1) name: String
+}
+
+blueprint Platform {
+	stackOverflow("stack-overflow")
+	discord("discord")
+	wietbotWebsite("wietbot-website")
+
+	property(1) name: String
+}
